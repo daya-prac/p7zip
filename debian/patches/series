@@ -1,0 +1,5 @@
+04_no_strip_by_default.diff
+01_makefile.patch
+02_man.patch
+05_exportsym.diff
+06_natspec.diff

@@ -1,0 +1,169 @@
+diff -ruN ../p7zip_9.20.1.orig/CPP/7zip/Archive/Zip/ZipIn.cpp ./CPP/7zip/Archive/Zip/ZipIn.cpp
+--- ../p7zip_9.20.1.orig/CPP/7zip/Archive/Zip/ZipIn.cpp	2010-10-20 11:56:00.000000000 +0700
++++ ./CPP/7zip/Archive/Zip/ZipIn.cpp	2011-09-20 15:29:18.000000000 +0700
+@@ -2,6 +2,9 @@
+ 
+ #include "StdAfx.h"
+ 
++#include <iconv.h>
++#include <natspec.h>
++
+ #include "../../../../C/CpuArch.h"
+ 
+ #include "Common/DynamicBuffer.h"
+@@ -11,13 +14,15 @@
+ 
+ #include "ZipIn.h"
+ 
++#include "myPrivate.h"	// global_use_utf16_conversion
++
+ #define Get16(p) GetUi16(p)
+ #define Get32(p) GetUi32(p)
+ #define Get64(p) GetUi64(p)
+ 
+ namespace NArchive {
+ namespace NZip {
+- 
++  
+ HRESULT CInArchive::Open(IInStream *stream, const UInt64 *searchHeaderSizeLimit)
+ {
+   _inBufMode = false;
+@@ -27,6 +32,10 @@
+   RINOK(FindAndReadMarker(stream, searchHeaderSizeLimit));
+   RINOK(stream->Seek(m_Position, STREAM_SEEK_SET, NULL));
+   m_Stream = stream;
++
++
++  /* Guess archive filename charset */
++  archive_oem_charset = natspec_get_charset_by_locale(NATSPEC_DOSCS, "");
+   return S_OK;
+ }
+ 
+@@ -206,6 +215,13 @@
+   SafeReadBytes(p, nameSize);
+   p[nameSize] = 0;
+   dest.ReleaseBuffer();
++
++  /* Convert filename from archive charset to current locale's charset */
++  p = natspec_convert((const char *)dest, NULL, archive_oem_charset, 0);
++  if (p) {
++    dest = p;
++    free(p);
++  }
+ }
+ 
+ void CInArchive::ReadExtra(UInt32 extraSize, CExtraBlock &extraBlock,
+diff -ruN ../p7zip_9.20.1.orig/CPP/7zip/Archive/Zip/ZipIn.h ./CPP/7zip/Archive/Zip/ZipIn.h
+--- ../p7zip_9.20.1.orig/CPP/7zip/Archive/Zip/ZipIn.h	2010-04-25 22:14:27.000000000 +0700
++++ ./CPP/7zip/Archive/Zip/ZipIn.h	2011-09-20 15:29:18.000000000 +0700
+@@ -117,6 +117,8 @@
+   ISequentialInStream *CreateLimitedStream(UInt64 position, UInt64 size);
+   IInStream* CreateStream();
+ 
++  const char *archive_oem_charset;
++
+   bool IsOpen() const { return m_Stream != NULL; }
+ };
+   
+diff -ruN ../p7zip_9.20.1.orig/CPP/7zip/Archive/Zip/ZipOut.cpp ./CPP/7zip/Archive/Zip/ZipOut.cpp
+--- ../p7zip_9.20.1.orig/CPP/7zip/Archive/Zip/ZipOut.cpp	2010-04-25 22:14:42.000000000 +0700
++++ ./CPP/7zip/Archive/Zip/ZipOut.cpp	2011-09-20 15:30:24.000000000 +0700
+@@ -2,10 +2,15 @@
+ 
+ #include "StdAfx.h"
+ 
++#include <iconv.h>
++#include <natspec.h>
++
+ #include "../../Common/OffsetStream.h"
+ 
+ #include "ZipOut.h"
+ 
++#include "myPrivate.h" // global_use_utf16_conversion
++
+ namespace NArchive {
+ namespace NZip {
+ 
+@@ -17,6 +22,20 @@
+   m_OutBuffer.SetStream(outStream);
+   m_OutBuffer.Init();
+   m_BasePosition = 0;
++
++  /* Guess archive filename charset */
++  archive_oem_charset = natspec_get_charset_by_locale(NATSPEC_DOSCS, "");
++}
++
++void COutArchive::RecodeFileName(CItem &item) {
++	char *p;
++
++	/* Convert filename from current locale charset to archive charset. */
++	p = natspec_convert((const char *)item.Name, archive_oem_charset, NULL, 0);
++	if (p) {
++		item.Name = p;
++		free(p);
++	}
+ }
+ 
+ void COutArchive::MoveBasePosition(UInt64 distanceToMove)
+diff -ruN ../p7zip_9.20.1.orig/CPP/7zip/Archive/Zip/ZipOut.h ./CPP/7zip/Archive/Zip/ZipOut.h
+--- ../p7zip_9.20.1.orig/CPP/7zip/Archive/Zip/ZipOut.h	2010-04-25 22:14:27.000000000 +0700
++++ ./CPP/7zip/Archive/Zip/ZipOut.h	2011-09-20 15:29:18.000000000 +0700
+@@ -49,6 +49,9 @@
+   void CreateStreamForCompressing(IOutStream **outStream);
+   void CreateStreamForCopying(ISequentialOutStream **outStream);
+   void SeekToPackedDataPosition();
++
++  const char *archive_oem_charset;
++  void RecodeFileName(CItem &item);
+ };
+ 
+ }}
+diff -ruN ../p7zip_9.20.1.orig/CPP/7zip/Archive/Zip/ZipUpdate.cpp ./CPP/7zip/Archive/Zip/ZipUpdate.cpp
+--- ../p7zip_9.20.1.orig/CPP/7zip/Archive/Zip/ZipUpdate.cpp	2010-11-07 22:48:43.000000000 +0600
++++ ./CPP/7zip/Archive/Zip/ZipUpdate.cpp	2011-09-20 15:29:18.000000000 +0700
+@@ -32,12 +32,12 @@
+ namespace NArchive {
+ namespace NZip {
+ 
++/*
++ * Create DOS-compatible archives on both UNIX and Windows, to force unpackers
++ * to not recode file names from OEM to Windows encoding.
++ */
+ static const Byte kHostOS =
+-  #ifdef _WIN32
+   NFileHeader::NHostOS::kFAT;
+-  #else
+-  NFileHeader::NHostOS::kUnix;
+-  #endif
+ 
+ static const Byte kMadeByHostOS = kHostOS;
+ static const Byte kExtractHostOS = kHostOS;
+@@ -89,6 +89,7 @@
+     item.NtfsATime = ui.NtfsATime;
+     item.NtfsCTime = ui.NtfsCTime;
+     item.NtfsTimeIsDefined = ui.NtfsTimeIsDefined;
++    archive.RecodeFileName(item);
+   }
+   else
+     isDir = item.IsDir();
+@@ -360,6 +361,7 @@
+     item.NtfsATime = ui.NtfsATime;
+     item.NtfsCTime = ui.NtfsCTime;
+     item.NtfsTimeIsDefined = ui.NtfsTimeIsDefined;
++    archive.RecodeFileName(item);
+ 
+     item.CentralExtra.RemoveUnknownSubBlocks();
+     item.LocalExtra.RemoveUnknownSubBlocks();
+diff -ruN ../p7zip_9.20.1.orig/makefile.linux_any_cpu_gcc_4.X ./makefile.linux_any_cpu_gcc_4.X
+--- ../p7zip_9.20.1.orig/makefile.linux_any_cpu_gcc_4.X	2011-01-12 02:57:46.000000000 +0600
++++ ./makefile.linux_any_cpu_gcc_4.X	2011-09-20 15:32:29.000000000 +0700
+@@ -17,7 +17,7 @@
+ 
+ PRE_COMPILED_HEADER=StdAfx.h.gch
+ 
+-LOCAL_LIBS=-lpthread
++LOCAL_LIBS=-lpthread -lnatspec
+ LOCAL_LIBS_DLL=$(LOCAL_LIBS) -ldl
+ 
+ OBJ_CRC32=$(OBJ_CRC32_C)
+Двоичные файлы ../p7zip_9.20.1.orig/.makefile.linux_x86_ppc_alpha_gcc_4.X.rej.swp и ./.makefile.linux_x86_ppc_alpha_gcc_4.X.rej.swp различаются

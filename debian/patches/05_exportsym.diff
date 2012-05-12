@@ -1,0 +1,24 @@
+diff -pru p7zip-9.04~dfsg.1.orig/CPP/Common/StringConvert.cpp p7zip-9.04~dfsg.1/CPP/Common/StringConvert.cpp
+--- p7zip-9.04~dfsg.1.orig/CPP/Common/StringConvert.cpp	2008-11-30 18:34:01.000000000 +0600
++++ p7zip-9.04~dfsg.1/CPP/Common/StringConvert.cpp	2011-02-08 15:38:07.000000000 +0600
+@@ -6,7 +6,7 @@
+ #include "StringConvert.h"
+ extern "C"
+ {
+-int global_use_utf16_conversion = 0;
++int DLLEXPORT global_use_utf16_conversion = 0;
+ }
+ 
+ namespace utf8
+diff -pru p7zip-9.04~dfsg.1.orig/CPP/Windows/FileFind.cpp p7zip-9.04~dfsg.1/CPP/Windows/FileFind.cpp
+--- p7zip-9.04~dfsg.1.orig/CPP/Windows/FileFind.cpp	2009-06-04 00:40:16.000000000 +0700
++++ p7zip-9.04~dfsg.1/CPP/Windows/FileFind.cpp	2011-02-08 16:08:19.000000000 +0600
+@@ -13,7 +13,7 @@
+ extern "C"
+ {
+ 
+-int global_use_lstat=1; // default behaviour : p7zip stores symlinks instead of dumping the files they point to
++int DLLEXPORT global_use_lstat=1; // default behaviour : p7zip stores symlinks instead of dumping the files they point to
+ }
+ #endif
+ 
