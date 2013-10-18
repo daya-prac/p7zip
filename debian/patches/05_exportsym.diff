@@ -1,6 +1,33 @@
-diff -pru p7zip-9.04~dfsg.1.orig/CPP/Common/StringConvert.cpp p7zip-9.04~dfsg.1/CPP/Common/StringConvert.cpp
---- p7zip-9.04~dfsg.1.orig/CPP/Common/StringConvert.cpp	2008-11-30 18:34:01.000000000 +0600
-+++ p7zip-9.04~dfsg.1/CPP/Common/StringConvert.cpp	2011-02-08 15:38:07.000000000 +0600
+diff --git a/CPP/7zip/Archive/Zip/ZipIn.cpp b/CPP/7zip/Archive/Zip/ZipIn.cpp
+index b36b61b..a4f8ed6 100644
+--- a/CPP/7zip/Archive/Zip/ZipIn.cpp
++++ b/CPP/7zip/Archive/Zip/ZipIn.cpp
+@@ -11,6 +11,8 @@
+ 
+ #include "ZipIn.h"
+ 
++#include "myPrivate.h"	// global_use_utf16_conversion
++
+ #define Get16(p) GetUi16(p)
+ #define Get32(p) GetUi32(p)
+ #define Get64(p) GetUi64(p)
+diff --git a/CPP/7zip/Archive/Zip/ZipOut.cpp b/CPP/7zip/Archive/Zip/ZipOut.cpp
+index aa82143..e98a3f4 100644
+--- a/CPP/7zip/Archive/Zip/ZipOut.cpp
++++ b/CPP/7zip/Archive/Zip/ZipOut.cpp
+@@ -6,6 +6,8 @@
+ 
+ #include "ZipOut.h"
+ 
++#include "myPrivate.h"  // global_use_utf16_conversion
++
+ namespace NArchive {
+ namespace NZip {
+ 
+diff --git a/CPP/Common/StringConvert.cpp b/CPP/Common/StringConvert.cpp
+index dc7dc26..cd386c1 100644
+--- a/CPP/Common/StringConvert.cpp
++++ b/CPP/Common/StringConvert.cpp
 @@ -6,7 +6,7 @@
  #include "StringConvert.h"
  extern "C"
@@ -9,10 +36,11 @@ diff -pru p7zip-9.04~dfsg.1.orig/CPP/Common/StringConvert.cpp p7zip-9.04~dfsg.1/
 +int DLLEXPORT global_use_utf16_conversion = 0;
  }
  
- namespace utf8
-diff -pru p7zip-9.04~dfsg.1.orig/CPP/Windows/FileFind.cpp p7zip-9.04~dfsg.1/CPP/Windows/FileFind.cpp
---- p7zip-9.04~dfsg.1.orig/CPP/Windows/FileFind.cpp	2009-06-04 00:40:16.000000000 +0700
-+++ p7zip-9.04~dfsg.1/CPP/Windows/FileFind.cpp	2011-02-08 16:08:19.000000000 +0600
+ 
+diff --git a/CPP/Windows/FileFind.cpp b/CPP/Windows/FileFind.cpp
+index 9e526a2..de0ca69 100644
+--- a/CPP/Windows/FileFind.cpp
++++ b/CPP/Windows/FileFind.cpp
 @@ -13,7 +13,7 @@
  extern "C"
  {
