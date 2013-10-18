@@ -1,5 +1,5 @@
 diff --git a/CPP/7zip/Archive/Zip/ZipIn.cpp b/CPP/7zip/Archive/Zip/ZipIn.cpp
-index b36b61b..3d9bcc3 100644
+index b36b61b..6207c29 100644
 --- a/CPP/7zip/Archive/Zip/ZipIn.cpp
 +++ b/CPP/7zip/Archive/Zip/ZipIn.cpp
 @@ -2,6 +2,9 @@
@@ -12,24 +12,7 @@ index b36b61b..3d9bcc3 100644
  #include "../../../../C/CpuArch.h"
  
  #include "Common/DynamicBuffer.h"
-@@ -11,13 +14,15 @@
- 
- #include "ZipIn.h"
- 
-+#include "myPrivate.h"	// global_use_utf16_conversion
-+
- #define Get16(p) GetUi16(p)
- #define Get32(p) GetUi32(p)
- #define Get64(p) GetUi64(p)
- 
- namespace NArchive {
- namespace NZip {
-- 
-+  
- HRESULT CInArchive::Open(IInStream *stream, const UInt64 *searchHeaderSizeLimit)
- {
-   _inBufMode = false;
-@@ -27,6 +32,10 @@ HRESULT CInArchive::Open(IInStream *stream, const UInt64 *searchHeaderSizeLimit)
+@@ -27,6 +30,10 @@ HRESULT CInArchive::Open(IInStream *stream, const UInt64 *searchHeaderSizeLimit)
    RINOK(FindAndReadMarker(stream, searchHeaderSizeLimit));
    RINOK(stream->Seek(m_Position, STREAM_SEEK_SET, NULL));
    m_Stream = stream;
@@ -40,7 +23,7 @@ index b36b61b..3d9bcc3 100644
    return S_OK;
  }
  
-@@ -206,6 +215,13 @@ void CInArchive::ReadFileName(UInt32 nameSize, AString &dest)
+@@ -206,6 +213,13 @@ void CInArchive::ReadFileName(UInt32 nameSize, AString &dest)
    SafeReadBytes(p, nameSize);
    p[nameSize] = 0;
    dest.ReleaseBuffer();
@@ -68,10 +51,10 @@ index 0565339..dadeaeb 100644
  };
    
 diff --git a/CPP/7zip/Archive/Zip/ZipOut.cpp b/CPP/7zip/Archive/Zip/ZipOut.cpp
-index aa82143..37277b0 100644
+index aa82143..6c08d31 100644
 --- a/CPP/7zip/Archive/Zip/ZipOut.cpp
 +++ b/CPP/7zip/Archive/Zip/ZipOut.cpp
-@@ -2,10 +2,15 @@
+@@ -2,6 +2,9 @@
  
  #include "StdAfx.h"
  
@@ -81,13 +64,7 @@ index aa82143..37277b0 100644
  #include "../../Common/OffsetStream.h"
  
  #include "ZipOut.h"
- 
-+#include "myPrivate.h" // global_use_utf16_conversion
-+
- namespace NArchive {
- namespace NZip {
- 
-@@ -17,6 +22,20 @@ void COutArchive::Create(IOutStream *outStream)
+@@ -17,6 +20,20 @@ void COutArchive::Create(IOutStream *outStream)
    m_OutBuffer.SetStream(outStream);
    m_OutBuffer.Init();
    m_BasePosition = 0;
