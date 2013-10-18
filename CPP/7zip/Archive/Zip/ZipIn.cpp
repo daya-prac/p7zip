@@ -2,6 +2,9 @@
 
 #include "StdAfx.h"
 
+#include <iconv.h>
+#include <natspec.h>
+
 #include "../../../../C/CpuArch.h"
 
 #include "Common/DynamicBuffer.h"
@@ -11,13 +14,15 @@
 
 #include "ZipIn.h"
 
+#include "myPrivate.h"	// global_use_utf16_conversion
+
 #define Get16(p) GetUi16(p)
 #define Get32(p) GetUi32(p)
 #define Get64(p) GetUi64(p)
 
 namespace NArchive {
 namespace NZip {
- 
+  
 HRESULT CInArchive::Open(IInStream *stream, const UInt64 *searchHeaderSizeLimit)
 {
   _inBufMode = false;
@@ -27,6 +32,10 @@ HRESULT CInArchive::Open(IInStream *stream, const UInt64 *searchHeaderSizeLimit)
   RINOK(FindAndReadMarker(stream, searchHeaderSizeLimit));
   RINOK(stream->Seek(m_Position, STREAM_SEEK_SET, NULL));
   m_Stream = stream;
+
+
+  /* Guess archive filename charset */
+  archive_oem_charset = natspec_get_charset_by_locale(NATSPEC_DOSCS, "");
   return S_OK;
 }
 
@@ -206,6 +215,13 @@ void CInArchive::ReadFileName(UInt32 nameSize, AString &dest)
   SafeReadBytes(p, nameSize);
   p[nameSize] = 0;
   dest.ReleaseBuffer();
+
+  /* Convert filename from archive charset to current locale's charset */
+  p = natspec_convert((const char *)dest, NULL, archive_oem_charset, 0);
+  if (p) {
+    dest = p;
+    free(p);
+  }
 }
 
 void CInArchive::ReadExtra(UInt32 extraSize, CExtraBlock &extraBlock,

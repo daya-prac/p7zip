@@ -2,9 +2,14 @@
 
 #include "StdAfx.h"
 
+#include <iconv.h>
+#include <natspec.h>
+
 #include "../../Common/OffsetStream.h"
 
 #include "ZipOut.h"
+
+#include "myPrivate.h" // global_use_utf16_conversion
 
 namespace NArchive {
 namespace NZip {
@@ -17,6 +22,20 @@ void COutArchive::Create(IOutStream *outStream)
   m_OutBuffer.SetStream(outStream);
   m_OutBuffer.Init();
   m_BasePosition = 0;
+
+  /* Guess archive filename charset */
+  archive_oem_charset = natspec_get_charset_by_locale(NATSPEC_DOSCS, "");
+}
+
+void COutArchive::RecodeFileName(CItem &item) {
+	char *p;
+
+	/* Convert filename from current locale charset to archive charset. */
+	p = natspec_convert((const char *)item.Name, archive_oem_charset, NULL, 0);
+	if (p) {
+		item.Name = p;
+		free(p);
+	}
 }
 
 void COutArchive::MoveBasePosition(UInt64 distanceToMove)

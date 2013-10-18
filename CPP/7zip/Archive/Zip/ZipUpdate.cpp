@@ -32,12 +32,12 @@ using namespace NSynchronization;
 namespace NArchive {
 namespace NZip {
 
+/*
+ * Create DOS-compatible archives on both UNIX and Windows, to force unpackers
+ * to not recode file names from OEM to Windows encoding.
+ */
 static const Byte kHostOS =
-  #ifdef _WIN32
   NFileHeader::NHostOS::kFAT;
-  #else
-  NFileHeader::NHostOS::kUnix;
-  #endif
 
 static const Byte kMadeByHostOS = kHostOS;
 static const Byte kExtractHostOS = kHostOS;
@@ -89,6 +89,7 @@ static void SetFileHeader(
     item.NtfsATime = ui.NtfsATime;
     item.NtfsCTime = ui.NtfsCTime;
     item.NtfsTimeIsDefined = ui.NtfsTimeIsDefined;
+    archive.RecodeFileName(item);
   }
   else
     isDir = item.IsDir();
@@ -360,6 +361,7 @@ static HRESULT UpdateItemOldData(COutArchive &archive,
     item.NtfsATime = ui.NtfsATime;
     item.NtfsCTime = ui.NtfsCTime;
     item.NtfsTimeIsDefined = ui.NtfsTimeIsDefined;
+    archive.RecodeFileName(item);
 
     item.CentralExtra.RemoveUnknownSubBlocks();
     item.LocalExtra.RemoveUnknownSubBlocks();

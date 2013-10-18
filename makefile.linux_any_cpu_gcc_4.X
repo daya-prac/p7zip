@@ -17,7 +17,7 @@ LINK_SHARED=-fPIC -shared
 
 PRE_COMPILED_HEADER=StdAfx.h.gch
 
-LOCAL_LIBS=-lpthread
+LOCAL_LIBS=-lpthread -lnatspec
 LOCAL_LIBS_DLL=$(LOCAL_LIBS) -ldl
 
 OBJ_CRC32=$(OBJ_CRC32_C)

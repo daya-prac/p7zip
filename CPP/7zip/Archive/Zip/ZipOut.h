@@ -49,6 +49,9 @@ public:
   void CreateStreamForCompressing(IOutStream **outStream);
   void CreateStreamForCopying(ISequentialOutStream **outStream);
   void SeekToPackedDataPosition();
+
+  const char *archive_oem_charset;
+  void RecodeFileName(CItem &item);
 };
 
 }}

@@ -117,6 +117,8 @@ public:
   ISequentialInStream *CreateLimitedStream(UInt64 position, UInt64 size);
   IInStream* CreateStream();
 
+  const char *archive_oem_charset;
+
   bool IsOpen() const { return m_Stream != NULL; }
 };
   
