@@ -9,8 +9,6 @@
 
 #include "ZipOut.h"
 
-#include "myPrivate.h" // global_use_utf16_conversion
-
 namespace NArchive {
 namespace NZip {
 
