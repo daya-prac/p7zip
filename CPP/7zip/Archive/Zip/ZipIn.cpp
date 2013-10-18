@@ -17,10 +17,10 @@
 #define Get16(p) GetUi16(p)
 #define Get32(p) GetUi32(p)
 #define Get64(p) GetUi64(p)
-
+ 
 namespace NArchive {
 namespace NZip {
-  
+ 
 HRESULT CInArchive::Open(IInStream *stream, const UInt64 *searchHeaderSizeLimit)
 {
   _inBufMode = false;
