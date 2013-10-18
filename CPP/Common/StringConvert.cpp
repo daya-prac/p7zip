@@ -6,7 +6,7 @@
 #include "StringConvert.h"
 extern "C"
 {
-int global_use_utf16_conversion = 0;
+int DLLEXPORT global_use_utf16_conversion = 0;
 }
 
 

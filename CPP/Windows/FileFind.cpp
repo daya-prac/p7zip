@@ -13,7 +13,7 @@
 extern "C"
 {
 
-int global_use_lstat=1; // default behaviour : p7zip stores symlinks instead of dumping the files they point to
+int DLLEXPORT global_use_lstat=1; // default behaviour : p7zip stores symlinks instead of dumping the files they point to
 }
 #endif
 
