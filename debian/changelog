@@ -1,3 +1,22 @@
+p7zip (9.20.1~dfsg.1-5) unstable; urgency=medium
+
+  * Adopting package (closes:  #812125).
+  * Switch to the `3.0 (quilt)' source format.
+  * Bump debhelper compatibility level to v9 and use minimised debian/rules.
+  * Refresh patches with gbp pq import/export. Removed 03_respect-umask.diff
+    as it was never applied.
+  * Add 03-include-linux-makefile.patch to have makefile.machine include
+    makefile.linux_any_cpu_gcc_4.X  instead of playing with the makefiles
+    in debian/rules.
+  * Add 05-hardening-flags.patch to support $(CPPFLAGS) and not to override
+    $(CXXFLAGS) and $(CFLAGS). This enables hardening builds (closes: #682167).
+  * debian/control:
+    + remove conflicts & replaces added in 4.39.dfsg.1-1 (10 years ago);
+    + add Vcs-Git and Vcs-Browser fields;
+    + bump Standards-Version to 3.9.6.
+
+ -- Robert Luberda <robert@debian.org>  Sun, 31 Jan 2016 12:20:37 +0100
+
 p7zip (9.20.1~dfsg.1-4.2) unstable; urgency=medium
 
   * Non-maintainer upload.
