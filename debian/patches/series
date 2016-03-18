@@ -1,6 +1,8 @@
-04_no_strip_by_default.diff
-01_makefile.patch
-02_man.patch
+01-makefile.patch
+02-man.patch
+03-include-linux-makefile.patch
+04-no-strip-by-default.patch
+05-hardening-flags.patch
+06_exportsym.diff
+07_natspec.diff
 CVE-2015-1038.patch
-05_exportsym.diff
-06_natspec.diff

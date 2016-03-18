@@ -1,13 +1,32 @@
-p7zip (9.20.1~dfsg.1-4.2i18n3~xenial0) xenial; urgency=low
+p7zip (9.20.1~dfsg.1-5+i18n3) xenial; urgency=low
 
    * debian/patches:
-         + Added 05_exportsym.diff: fixes exporting dynamic library symbols,
+         + Added 06_exportsym.diff: fixes exporting dynamic library symbols,
            caused by 01_makefile.patch.
-         + Added 06_natspec.diff: use natspec library to recode filenames
+         + Added 07_natspec.diff: use natspec library to recode filenames
            in zip archives to/from Windows locale's charset. Fixes
            Ubuntu bug #580961 in file-roller.
 
- -- Dmitry Frolov (Launchpad.net) <dmitry.frolov@gmail.com>  Fri, 18 Mar 2016 11:34:35 +0600
+ -- Dmitry Frolov (Launchpad.net) <dmitry.frolov@gmail.com>  Fri, 18 Mar 2016 12:21:31 +0600
+
+p7zip (9.20.1~dfsg.1-5) unstable; urgency=medium
+
+  * Adopting package (closes:  #812125).
+  * Switch to the `3.0 (quilt)' source format.
+  * Bump debhelper compatibility level to v9 and use minimised debian/rules.
+  * Refresh patches with gbp pq import/export. Removed 03_respect-umask.diff
+    as it was never applied.
+  * Add 03-include-linux-makefile.patch to have makefile.machine include
+    makefile.linux_any_cpu_gcc_4.X  instead of playing with the makefiles
+    in debian/rules.
+  * Add 05-hardening-flags.patch to support $(CPPFLAGS) and not to override
+    $(CXXFLAGS) and $(CFLAGS). This enables hardening builds (closes: #682167).
+  * debian/control:
+    + remove conflicts & replaces added in 4.39.dfsg.1-1 (10 years ago);
+    + add Vcs-Git and Vcs-Browser fields;
+    + bump Standards-Version to 3.9.6.
+
+ -- Robert Luberda <robert@debian.org>  Sun, 31 Jan 2016 12:20:37 +0100
 
 p7zip (9.20.1~dfsg.1-4.2) unstable; urgency=medium
 
@@ -24,7 +43,6 @@ p7zip (9.20.1~dfsg.1-4.1) unstable; urgency=low
     libwxgtk2.8-dev.  (Closes: #748639)
 
  -- Olly Betts <olly@survex.com>  Mon, 19 May 2014 17:39:26 +1200
->>>>>>> ubuntu
 
 p7zip (9.20.1~dfsg.1-4) unstable; urgency=low
 
